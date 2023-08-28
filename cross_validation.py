@@ -9,11 +9,24 @@ import logging
 import sys
 from time import strftime, localtime
 from nltk import word_tokenize
+import argparse
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler(sys.stdout))
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--useglove', type=bool,
+                        help='Contact glove or not.')
+    parser.add_argument('--word_embedding', type=str, default='glove.6B.50d.txt',
+                        help='Path to word embedding file.')
+    parser.add_argument('--dataset', type=str, default='dataset.csv',
+                        help='Path to dataset file')
+    parser.add_argument('--features', type=str, default='dataset_features.csv',
+                        help='Path to features file')
+    args = parser.parse_args()
+    return args
 
 def tokenize(q):
     return word_tokenize(q.lower())
@@ -165,15 +178,14 @@ def get_numpy_word_embed(word2ix):
     return data
 
 
-def run():
-    useglove = True
-    df = pd.read_csv('dataset_features.csv')
+def run(args):
+    df = pd.read_csv(args.features)
     feature_list = ['QE_Uncertainty', 'QE_Incongruity']
 
-    log_file = 'results-{}-{}.log'.format(useglove, strftime("%y%m%d-%H%M", localtime()))
+    log_file = 'results-{}-{}.log'.format(args.useglove, strftime("%y%m%d-%H%M", localtime()))
     logger.addHandler(logging.FileHandler(log_file))
-    if useglove:
-        dff = pd.read_csv('dataset.csv')
+    if args.useglove:
+        dff = pd.read_csv(args.dataset)
         word2id = getWord2id(dff)
         numpy_embed = get_numpy_word_embed(word2id)
         embedding = nn.Embedding.from_pretrained(torch.FloatTensor(numpy_embed)).to('cuda')
@@ -232,4 +244,5 @@ def run():
 
 
 if __name__ == '__main__':
-    run()
+    args = parse_args()
+    run(args)

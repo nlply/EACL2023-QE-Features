@@ -8,6 +8,7 @@ import torch.nn as nn
 import numpy as np
 import math
 from nltk import word_tokenize
+import argparse
 
 
 def getWord2id(df):
@@ -30,11 +31,10 @@ def getWord2id(df):
     return word2id
 
 
-def get_numpy_word_embed(word2ix):
+def get_numpy_word_embed(args, word2ix):
     row = 0
-    whole = 'glove.6B.50d.txt'
     words_embed = {}
-    with open(whole, mode='r', encoding='utf-8')as f:
+    with open(args.word_embedding, mode='r', encoding='utf-8') as f:
         lines = f.readlines()
         for line in lines:
             line_list = line.split()
@@ -147,14 +147,27 @@ def get_features(df, embedding, word2id):
     return qe_uncertainty_values, qe_incongruity_values, lb
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', type=str, default='dataset.csv',
+                        help='Path to dataset file')
+    parser.add_argument('--word_embedding', type=str, default='glove.6B.50d.txt',
+                        help='Path to word embedding file.')
+    parser.add_argument('--features', type=str, default='dataset_features.csv',
+                        help='Path to save the features file')
+    args = parser.parse_args()
+    return args
+
+
 if __name__ == '__main__':
-    df = pd.read_csv('dataset.csv')
+    args = parse_args()
+    df = pd.read_csv(args.dataset)
     word2id = getWord2id(df)
-    numpy_embed = get_numpy_word_embed(word2id)
+    numpy_embed = get_numpy_word_embed(args, word2id)
     embedding = nn.Embedding.from_pretrained(torch.FloatTensor(numpy_embed)).to('cuda')
     QE_Uncertainty, QE_Incongruity, labels = get_features(df, embedding, word2id)
     pd.DataFrame({
         'QE_Uncertainty': QE_Uncertainty,
         'QE_Incongruity': QE_Incongruity,
         'label': labels,
-    }).to_csv('dataset_features.csv', index=False)
+    }).to_csv(args.features, index=False)
