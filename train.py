@@ -11,6 +11,18 @@ from nltk import word_tokenize
 import argparse
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', type=str, default='dataset.csv',
+                        help='Path to dataset file')
+    parser.add_argument('--word_embedding', type=str, default='glove.6B.50d.txt',
+                        help='Path to word embedding file.')
+    parser.add_argument('--features', type=str, default='dataset_features.csv',
+                        help='Path to save the features file')
+    args = parser.parse_args()
+    return args
+
+
 def getWord2id(df):
     setups = df['set-up'].tolist()
     punchlines = df['punchline'].tolist()
@@ -146,17 +158,6 @@ def get_features(df, embedding, word2id):
 
     return qe_uncertainty_values, qe_incongruity_values, lb
 
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', type=str, default='dataset.csv',
-                        help='Path to dataset file')
-    parser.add_argument('--word_embedding', type=str, default='glove.6B.50d.txt',
-                        help='Path to word embedding file.')
-    parser.add_argument('--features', type=str, default='dataset_features.csv',
-                        help='Path to save the features file')
-    args = parser.parse_args()
-    return args
 
 
 if __name__ == '__main__':
