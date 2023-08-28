@@ -139,7 +139,7 @@ def get_features(df, embedding, word2id):
 
         incongruity = getConditionalEntropy(setup_matrix, punchline_matrix)
 
-        if math.isnan(incongruity) or not isfloat(incongruity):  # 很少出现nan
+        if math.isnan(incongruity) or not isfloat(incongruity):
             incongruity = torch.tensor(-1).item()
 
         qe_incongruity_values.append(incongruity)
